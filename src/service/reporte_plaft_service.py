@@ -27,10 +27,26 @@ def reporte_plaft_service():
     mes = int(fechaCorte[4:6])
     dia = int(fechaCorte[6:8])
     fechaCorte = datetime.datetime(anio, mes, dia)    
-    logger.info("fechaCorte datetime => " + str(fechaCorte))
 
     registrar_log_plaft_proceso_interno('ACSELE-MASIVO-CARGAR_TEMPORAL-INICIO')
     registrar_log_plaft_proceso_interno('00.CALCULANDO FECHAS')
+    logger.info("fechaCorte datetime => " + str(fechaCorte))
+    fechaCorte_d = fechaCorte + datetime.timedelta(days=1)
+    fechaCorte_str = fechaCorte_d.strftime('%d/%m/%Y')
+    fechaCorte_d_fin = fechaCorte_d - datetime.timedelta(days=1)
+    fechaCorte_fin_str = fechaCorte_d_fin.strftime('%d/%m/%Y')
+    fecha_inicio_recaudacion_d = fechaCorte_d - datetime.timedelta(days=1) - datetime.timedelta(days=365)
+    fecha_inicio_recaudacion_str = fecha_inicio_recaudacion_d.strftime('%d/%m/%Y')
+    logger.info("fechaCorte => " + fechaCorte_str)
+    logger.info("fechaCorteFin => " + fechaCorte_fin_str)
+    logger.info("fechaInicioRecaudacion => " + fecha_inicio_recaudacion_str)
+
+    registrar_log_plaft_proceso_interno(f'00.FECHA CORTE: {fechaCorte_str}')
+    registrar_log_plaft_proceso_interno(f'00.FECHA CORTE FIN: {fechaCorte_fin_str}')
+    registrar_log_plaft_proceso_interno(f'00.FECHA INICIO RECAUDACION:: {fecha_inicio_recaudacion_str}')
+    registrar_log_plaft_proceso_interno(f'01.ELIMINANDO TABLAS')
+
+
 
 
     response = {
