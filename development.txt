@@ -13,7 +13,7 @@ python app.py
 
 #Generar y subir imagen
 gcloud config set project is-staging-408920
-gcloud builds submit --tag gcr.io/is-staging-408920/etl-dtsx-reporte-plaft
+gcloud builds submit --tag gcr.io/is-staging-408920/etl-dtsx-reporte-plaft-acsele-masivo
 
 
 gcloud builds submit --tag gcr.io/is-production-384419/etl-dtsx-rpt-produccion
