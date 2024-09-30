@@ -444,3 +444,42 @@ def registrar_log_plaft_proceso_interno(descripcion):
         dfAlloy = pd.DataFrame()  # Devolver un DataFrame vacío o manejar de otra manera
     logger.info('registrar_log_plaft_proceso_interno - fin')
     return dfAlloy
+
+def truncate_temporales(tabla):
+    logger.info(f'truncate_temporales {tabla} - inicio')
+    res=execute_query_with_results(f"TRUNCATE TABLE INTERSEGUROR.{tabla};",'alloy')
+    logger.info(f'truncate_temporales {tabla} - fin')
+    return res
+
+def consultar_uni_masivos(fecha):
+    logger.info('consultar_uni_masivos - inicio')
+    try:
+        query = f"""
+        SELECT
+            CTX.ID,
+            CTX.ITEM,
+            ST.DESCRIPTION AS ESTADO,
+            PRO.DESCRIPTION AS PRODUCTO,
+            PREP.NUMEROPOLIZAINPUT,
+            PREP.FECHACARGASISTEMAINPUT,
+            PREP.NOMBREARCHIVOTRAMAINPUT,
+            PDCO.INITIALDATE,
+            PDCO.FINISHDATE
+        FROM INTERSEGURO.PREPOLICY PREP
+        INNER JOIN INTERSEGURO.POLICYDCO PDCO ON PREP.PK = PDCO.DCOID
+        INNER JOIN INTERSEGURO.CONTEXTOPERATION CTX ON CTX.ID = PDCO.OPERATIONPK
+        INNER JOIN INTERSEGURO.STATE ST ON ST.STATEID = PDCO.STATEID
+        INNER JOIN INTERSEGURO.AGREGATEDPOLICY AP ON CTX.ITEM = AP.AGREGATEDPOLICYID
+        INNER JOIN INTERSEGURO.PRODUCT PRO ON PRO.PRODUCTID = AP.PRODUCTID
+        INNER JOIN INTERSEGURO.PRODUCTPROPERTY PRE ON PRE.PRO_ID = PRO.PRODUCTID
+        WHERE PRE.PRP_TYPE != 2 
+          AND CTX.STATUS = 2  
+          AND CTX.TIME_STAMP < '{fecha}';
+        """
+        dfAlloy = execute_query_to_df(query, 'alloy')
+        logger.info(f"consultar_uni_masivos - => {len(dfAlloy)}")
+    except Exception as e:
+        logger.error(f"Error en consultar_uni_masivos: {str(e)}")
+        dfAlloy = pd.DataFrame()  # Devolver un DataFrame vacío o manejar de otra manera
+    logger.info('consultar_uni_masivos - fin')
+    return dfAlloy
