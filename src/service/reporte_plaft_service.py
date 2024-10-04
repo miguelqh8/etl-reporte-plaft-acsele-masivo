@@ -5,7 +5,7 @@ from ..repository.reporte_plaft_repository import (
     obtener_ultimo_proceso_plaft,
     registrar_log_plaft_proceso_interno,
     truncate_temporales,
-    insertar_tmp_direcciones_masivos,
+    poblar_plaft_transaccional,
     poblar_tmp_direcciones_masivos,
     poblar_uni_masivos,
     poblar_pre_contra_mas,
@@ -136,6 +136,10 @@ def reporte_plaft_service():
     actualizar_actividad_economica()
     
     registrar_log_plaft_proceso_interno(f'ACSELE-MASIVO-CARGAR_TEMPORAL-FIN')
+    
+    registrar_log_plaft_proceso_interno(f'ACSELE-MASIVO-TRANSACCIONAL-INICIO')
+    poblar_plaft_transaccional()
+    registrar_log_plaft_proceso_interno(f'ACSELE-MASIVO-TRANSACCIONAL-FIN')
     
     response = {
         "Message": "Mi trabajo aqui ha terminado :D" 
