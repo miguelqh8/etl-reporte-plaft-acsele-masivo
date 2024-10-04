@@ -5,7 +5,25 @@ from ..repository.reporte_plaft_repository import (
     obtener_ultimo_proceso_plaft,
     registrar_log_plaft_proceso_interno,
     truncate_temporales,
-    consultar_uni_masivos
+    insertar_tmp_direcciones_masivos,
+    poblar_tmp_direcciones_masivos,
+    poblar_uni_masivos,
+    poblar_pre_contra_mas,
+    poblar_pre_aseg_mas,
+    poblar_mig_contratante_mas_n,
+    poblar_mig_contratante_mas_j,
+    poblar_mig_asegurado_mas,
+    poblar_mig_asegurado_mas2,
+    poblar_mig_asegurado_mas3,
+    poblar_mig_asegurado_mas4,
+    poblar_mig_asegurado_mas5,
+    poblar_tmp_uni_benef_mas,
+    poblar_mig_benef_sin_mas,
+    poblar_tmp_montos,
+    querys_filtros,
+    poblar_productos,
+    poblar_final_masivos,
+    actualizar_actividad_economica
 )
 import datetime
 import pandas as pd
@@ -38,9 +56,9 @@ def reporte_plaft_service():
     fechaCorte_str = fechaCorte_d.strftime('%d/%m/%Y')
     fechaCorte_str2 = fechaCorte_d.strftime('%Y-%m-%d')
     fechaCorte_d_fin = fechaCorte_d - datetime.timedelta(days=1)
-    fechaCorte_fin_str = fechaCorte_d_fin.strftime('%d/%m/%Y')
+    fechaCorte_fin_str = fechaCorte_d_fin.strftime('%Y-%m-%d')
     fecha_inicio_recaudacion_d = fechaCorte_d - datetime.timedelta(days=1) - datetime.timedelta(days=365)
-    fecha_inicio_recaudacion_str = fecha_inicio_recaudacion_d.strftime('%d/%m/%Y')
+    fecha_inicio_recaudacion_str = fecha_inicio_recaudacion_d.strftime('%Y-%m-%d')
     logger.info("fechaCorte => " + fechaCorte_str)
     logger.info("fechaCorteFin => " + fechaCorte_fin_str)
     logger.info("fechaInicioRecaudacion => " + fecha_inicio_recaudacion_str)
@@ -66,13 +84,58 @@ def reporte_plaft_service():
     
     registrar_log_plaft_proceso_interno(f'02.CARGAR TABLAS TEMPORALES')
     registrar_log_plaft_proceso_interno(f'02.1.POLIZAS MASIVOS')
-    masivos=consultar_uni_masivos(fechaCorte_str2)
-    masivos = masivos.sort_values(by=['NUMEROPOLIZAINPUT', 'ID'], ascending=[True, False])
-    masivos['ROW_NUMBER'] = masivos.groupby('NUMEROPOLIZAINPUT').cumcount() + 1
-    df_filtered_masivos = masivos[(masivos['ROW_NUMBER'] == 1) & (masivos['ESTADO'] == 'Vigente')]
-    df_filtered_masivos['FLAG_CARGA'] = 1
-    print(df_filtered_masivos[['ID', 'ITEM', 'ESTADO', 'PRODUCTO', 'NUMEROPOLIZAINPUT', 'FECHACARGASISTEMAINPUT','NOMBREARCHIVOTRAMAINPUT', 'FLAG_CARGA', 'INITIALDATE', 'FINISHDATE']])
-    df_filtered_masivos.to_csv('resultados_pandas.csv', index=False)
+    poblar_uni_masivos(fechaCorte_str2)
+    
+    registrar_log_plaft_proceso_interno(f'02.2.DIRECCIONES MASIVOS')
+    poblar_tmp_direcciones_masivos()
+    poblar_pre_contra_mas()
+    poblar_pre_aseg_mas()
+    
+    registrar_log_plaft_proceso_interno(f'02.3.CONTRATANTES NATURAL')
+    poblar_mig_contratante_mas_n()
+    
+    registrar_log_plaft_proceso_interno(f'02.4.CONTRATANTES JURIDICO')
+    poblar_mig_contratante_mas_j()
+    
+    registrar_log_plaft_proceso_interno(f'02.5.ASEGURADO')
+    poblar_mig_asegurado_mas()
+    
+    registrar_log_plaft_proceso_interno(f'02.6.ADD ASEGURADOS DESGPERSONAL')
+    poblar_mig_asegurado_mas2()
+
+    registrar_log_plaft_proceso_interno(f'02.7.ADD ASEGURADOS DESGPERSONAL 2')
+    poblar_mig_asegurado_mas3()
+    
+    registrar_log_plaft_proceso_interno(f'02.8.ADD ASEGURADOS 2')
+    poblar_mig_asegurado_mas4()
+    
+    registrar_log_plaft_proceso_interno(f'02.9.ADD ASEGURADOS ESP')
+    poblar_mig_asegurado_mas5()
+    
+    registrar_log_plaft_proceso_interno(f'02.10.BENEFICIARIOS SINIESTROS')
+    poblar_tmp_uni_benef_mas(fechaCorte_str2)
+    
+    registrar_log_plaft_proceso_interno(f'02.11.BENEFICIARIOS')
+    poblar_mig_benef_sin_mas()
+    
+    registrar_log_plaft_proceso_interno(f'03. CARGAR TABLAS TEMPORALES MONTOS')
+    poblar_tmp_montos(fechaCorte_str2,fecha_inicio_recaudacion_str,fechaCorte_fin_str)
+    
+    registrar_log_plaft_proceso_interno(f'04. UNIFICANDO PERSONAS')
+    
+    registrar_log_plaft_proceso_interno(f'05. FILTROS')
+    querys_filtros(fechaCorte_str2)
+    
+    registrar_log_plaft_proceso_interno(f'06. PRODUCTOS DEFINICION')
+    poblar_productos()
+    
+    registrar_log_plaft_proceso_interno(f'07. FINAL MASIVOS')
+    poblar_final_masivos()
+    
+    registrar_log_plaft_proceso_interno(f'08. ACTIVIDAD ECONOMICA')
+    actualizar_actividad_economica()
+    
+    registrar_log_plaft_proceso_interno(f'ACSELE-MASIVO-CARGAR_TEMPORAL-FIN')
     
     response = {
         "Message": "Mi trabajo aqui ha terminado :D" 
