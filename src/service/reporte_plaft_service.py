@@ -23,7 +23,8 @@ from ..repository.reporte_plaft_repository import (
     querys_filtros,
     poblar_productos,
     poblar_final_masivos,
-    actualizar_actividad_economica
+    actualizar_actividad_economica,
+    unificando_persona
 )
 import datetime
 import pandas as pd
@@ -122,6 +123,7 @@ def reporte_plaft_service():
     poblar_tmp_montos(fechaCorte_str2,fecha_inicio_recaudacion_str,fechaCorte_fin_str)
     
     registrar_log_plaft_proceso_interno(f'04. UNIFICANDO PERSONAS')
+    unificando_persona()
     
     registrar_log_plaft_proceso_interno(f'05. FILTROS')
     querys_filtros(fechaCorte_str2)

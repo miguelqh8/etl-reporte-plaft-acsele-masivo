@@ -734,3 +734,10 @@ def poblar_plaft_transaccional():
     res=execute_query_with_results(query1,'alloy')
     logger.info(f'poblar_plaft_transaccional - fin')
     return res  
+
+def unificando_persona():
+    logger.info(f'unificando_persona - inicio')
+    query1=f"INSERT INTO INTERSEGUROR.TBL_PERSONAS_VIDA SELECT * FROM MIG_ASEGURADO_VNO UNION ALL SELECT * FROM MIG_CONTRATANTE_VNO UNION ALL SELECT * FROM MIG_CONTRATANTE_VNO_J UNION ALL SELECT * FROM MIG_BENEF_SIN; "
+    res=execute_query_with_results(query1,'alloy')
+    logger.info(f'unificando_persona - fin')
+    return res  
